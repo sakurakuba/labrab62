@@ -3,33 +3,26 @@ from django.shortcuts import get_object_or_404
 from django.urls import reverse, reverse_lazy
 from django.views.generic import CreateView, ListView, DeleteView
 
-from webapp.forms import CartForm, OrderForm
+from webapp.forms import CartForm, OrderForm, ProductForm
 from webapp.models import Cart, Product, Order, OrderProduct
 
 
 class CartAddView(CreateView):
-    model = Cart
-    form_class = CartForm
+    form_class = ProductForm
 
     def form_valid(self, form):
         product = get_object_or_404(Product, pk=self.kwargs.get("pk"))
         qty = form.cleaned_data.get("qty")
+
         if qty > product.amount:
             return HttpResponseBadRequest(
                 f"Количество товара {product.name} всего {product.amount}. Добавить {qty} штук не получится")
+
+        if product.pk not in self.request.session:
+            self.request.session[product.pk] = qty
+
         else:
-            # try:
-            #     cart_product = Cart.objects.get(product=product)
-            #     cart_product.qty += qty
-            #     cart_product.save()
-            # except Cart.DoesNotExist:
-            #     Cart.objects.create(product=product, qty=qty)
-            cart_product, is_created = Cart.objects.get_or_create(product=product)
-            if is_created:
-                cart_product.qty = qty
-            else:
-                cart_product.qty += qty
-            cart_product.save()
+            self.request.session[product.pk] += qty
         return HttpResponseRedirect(self.get_success_url())
 
     def get_success_url(self):
@@ -40,15 +33,26 @@ class CartAddView(CreateView):
 
 
 class CartView(ListView):
-    model = Cart
+    model = Product
     template_name = "cart/cart_view.html"
     context_object_name = "cart"
 
     def get_context_data(self, *, object_list=None, **kwargs):
         context = super().get_context_data(object_list=None, **kwargs)
-        context['total'] = Cart.get_total()
+        context['total'] = self.get_total()
         context['form'] = OrderForm()
         return context
+
+    def product_total(self, key):
+        #product = get_object_or_404(Product, pk=self.kwargs.get("pk"))
+        return self.request.session.get(key) * product.price
+
+    def get_total(self):
+        total = 0
+        for key, val in self.request.session.items():
+            if key == Product.objects.all():
+                total += self.product_total(key)
+        return total
 
 
 class CartDeleteView(DeleteView):

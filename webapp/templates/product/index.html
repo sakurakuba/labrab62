@@ -1,7 +1,6 @@
 {% extends 'base.html' %}
 
 {% block content %}
-    {{ request.path }}
     <h1 class="text-center">Товары</h1>
     <div class="my-3">{% include 'partial/search.html' %}</div>
     {% if is_paginated %}

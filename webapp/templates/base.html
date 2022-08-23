@@ -35,7 +35,7 @@
                 {% endif %}
 
                 {% if request.user.is_authenticated %}
-                    {% if user.is_superuser or perms.issueTracker.add_product %}
+                    {% if user.is_superuser or perms.webapp.add_product %}
                         <li class="nav-item">
                             <a class="nav-link" href="{% url 'webapp:product_create' %}">Создание товара</a>
                         </li>

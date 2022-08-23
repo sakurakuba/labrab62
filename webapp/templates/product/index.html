@@ -15,7 +15,7 @@
                                 href="{% url "webapp:product_view" product.pk %}">{{ product.name }}</a></h5>
                         <p class="card-text">Категория: {{ product.get_category_display }}</p>
                         <p class="card-text">Осталось: {{ product.amount }} по {{ product.price }} сом</p>
-                        {% if user.is_superuser or perms.issueTracker.add_product %}
+                        {% if user.is_superuser or perms.webapp.change_product or perms.webapp.delete_product %}
                         <div class="btn-group">
                             <a class="btn btn-primary" href="{% url 'webapp:product_update' product.pk %}">Изменить</a>
                             <a class="btn btn-danger" href="{% url 'webapp:product_delete' product.pk %}">Удалить</a>

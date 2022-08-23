@@ -2,10 +2,14 @@
 
 {% block title %}Просмотр{% endblock %}
 
+
 {% block nav %}
+    {% if user.is_superuser or perms.webapp.change_product or perms.webapp.delete_product %}
     <li class="nav-item"><a class="nav-link" href="{% url 'webapp:product_update' product.pk %}">Изменить</a></li>
     <li class="nav-item"><a class="nav-link" href="{% url 'webapp:product_delete' product.pk %}">Удалить</a></li>
+{% endif %}
 {% endblock %}
+
 
 {% block content %}
     <div class="card">

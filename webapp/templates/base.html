@@ -34,9 +34,13 @@
                     </li>
                 {% endif %}
 
-                <li class="nav-item">
-                    <a class="nav-link" href="{% url 'webapp:product_create' %}">Создание товара</a>
-                </li>
+                {% if request.user.is_authenticated %}
+                    {% if user.is_superuser or perms.issueTracker.add_product %}
+                        <li class="nav-item">
+                            <a class="nav-link" href="{% url 'webapp:product_create' %}">Создание товара</a>
+                        </li>
+                    {% endif %}
+                {% endif %}
                 <li class="nav-item">
                     <a class="nav-link" href="{% url 'webapp:cart' %}">Корзина</a>
                 </li>

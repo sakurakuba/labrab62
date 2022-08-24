@@ -71,7 +71,7 @@ class CartDeleteOneView(View):
         cart = self.request.session.get('cart', {})
         if str(pk) in cart:
             cart[str(pk)] -= 1
-            if cart[str(pk)] < 0:
+            if cart[str(pk)] < 1:
                 cart.pop(str(pk))
             self.request.session['cart'] = cart
         return redirect("webapp:cart")

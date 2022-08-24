@@ -12,10 +12,8 @@ class ProductForm(forms.ModelForm):
         exclude = []
 
 
-class CartForm(forms.ModelForm):
-    class Meta:
-        model = Cart
-        fields = ["qty"]
+class CartForm(forms.Form):
+    qty = forms.IntegerField(min_value=1)
 
 
 class OrderForm(forms.ModelForm):

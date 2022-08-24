@@ -1,28 +1,29 @@
+from django.db.models import F
 from django.http import HttpResponseRedirect, HttpResponseBadRequest
-from django.shortcuts import get_object_or_404
+from django.shortcuts import get_object_or_404, redirect
 from django.urls import reverse, reverse_lazy
-from django.views.generic import CreateView, ListView, DeleteView
+from django.views import View
+from django.views.generic import CreateView, ListView, DeleteView, TemplateView
 
 from webapp.forms import CartForm, OrderForm, ProductForm
 from webapp.models import Cart, Product, Order, OrderProduct
 
 
-class CartAddView(CreateView):
-    form_class = ProductForm
+class CartAddView(View):
 
-    def form_valid(self, form):
-        product = get_object_or_404(Product, pk=self.kwargs.get("pk"))
-        qty = form.cleaned_data.get("qty")
-
+    def post(self, request, pk, *args, **kwargs):
+        product = get_object_or_404(Product, pk=pk)
+        qty = int(self.request.POST.get("qty"))
         if qty > product.amount:
             return HttpResponseBadRequest(
                 f"Количество товара {product.name} всего {product.amount}. Добавить {qty} штук не получится")
-
-        if product.pk not in self.request.session:
-            self.request.session[product.pk] = qty
-
         else:
-            self.request.session[product.pk] += qty
+            cart = self.request.session.get("cart", {})
+            if str(product.pk) in cart:
+                cart[str(product.pk)] += qty
+            else:
+                cart[str(product.pk)] = qty
+            self.request.session['cart'] = cart
         return HttpResponseRedirect(self.get_success_url())
 
     def get_success_url(self):
@@ -32,54 +33,49 @@ class CartAddView(CreateView):
         return reverse("webapp:index")
 
 
-class CartView(ListView):
-    model = Product
+class CartView(TemplateView):
     template_name = "cart/cart_view.html"
     context_object_name = "cart"
 
-    def get_context_data(self, *, object_list=None, **kwargs):
-        context = super().get_context_data(object_list=None, **kwargs)
-        context['total'] = self.get_total()
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        cart = self.request.session.get('cart', {})
+        products = []
+        total = 0
+        for pk, qty in cart.items():
+            product = Product.objects.get(pk=pk)
+            product_total = qty * product.price
+            total += product_total
+            products.append({"product": product, "qty": qty, 'product_total': product_total})
+        #products = Product.objects.filter(id__in=cart.keys()).annotate(total=F('price') * cart.get(F("pk")))
+        print(products)
+        context['cart'] = products
+        context['total'] = total
         context['form'] = OrderForm()
         return context
 
-    def product_total(self, key):
-        #product = get_object_or_404(Product, pk=self.kwargs.get("pk"))
-        return self.request.session.get(key) * product.price
 
-    def get_total(self):
-        total = 0
-        for key, val in self.request.session.items():
-            if key == Product.objects.all():
-                total += self.product_total(key)
-        return total
+class CartDeleteView(View):
+    def get(self, request, pk, *args, **kwargs):
+        cart = self.request.session.get('cart', {})
+        if str(pk) in cart:
+            cart.pop(str(pk))
+            self.request.session['cart'] = cart
 
-
-class CartDeleteView(DeleteView):
-    model = Cart
-    success_url = reverse_lazy('webapp:cart')
-
-    def get(self, request, *args, **kwargs):
-        return self.delete(request, *args, **kwargs)
+        return redirect("webapp:cart")
 
 
-class CartDeleteOneView(DeleteView):
-    model = Cart
-    success_url = reverse_lazy('webapp:cart')
+class CartDeleteOneView(View):
 
-    def get(self, request, *args, **kwargs):
-        return self.delete(request, *args, **kwargs)
+    def get(self, request, pk, *args, **kwargs):
+        cart = self.request.session.get('cart', {})
+        if str(pk) in cart:
+            cart[str(pk)] -= 1
+            if cart[str(pk)] < 0:
+                cart.pop(str(pk))
+            self.request.session['cart'] = cart
+        return redirect("webapp:cart")
 
-    def delete(self, request, *args, **kwargs):
-        self.object = self.get_object()
-        success_url = self.get_success_url()
-        cart = self.object
-        cart.qty -= 1
-        if cart.qty < 1:
-            cart.delete()
-        else:
-            cart.save()
-        return HttpResponseRedirect(success_url)
 
 
 class OrderCreate(CreateView):

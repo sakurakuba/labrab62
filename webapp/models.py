@@ -28,29 +28,6 @@ class Product(models.Model):
         verbose_name_plural = 'Товары'
 
 
-class Cart(models.Model):
-    product = models.ForeignKey('webapp.Product', on_delete=models.CASCADE,
-                                verbose_name='Товар', related_name='in_cart')
-    qty = models.PositiveIntegerField(verbose_name='Количество', default=1)
-
-    def __str__(self):
-        return f'{self.product.name} - {self.qty}'
-
-    class Meta:
-        verbose_name = 'Товар в корзине'
-        verbose_name_plural = 'Товары в корзине'
-
-    def get_product_total(self):
-        return self.qty * self.product.price
-
-    @classmethod
-    def get_total(cls):
-        total = 0
-        for cart in cls.objects.all():
-            total += cart.get_product_total()
-        return total
-
-
 class Order(models.Model):
     name = models.CharField(max_length=50, verbose_name='Имя')
     phone = models.CharField(max_length=30, verbose_name='Телефон')

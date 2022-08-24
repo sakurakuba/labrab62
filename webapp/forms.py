@@ -1,5 +1,5 @@
 from django import forms
-from webapp.models import Product, Cart, Order
+from webapp.models import Product, Order
 
 
 class SearchForm(forms.Form):
@@ -10,10 +10,6 @@ class ProductForm(forms.ModelForm):
     class Meta:
         model = Product
         exclude = []
-
-
-class CartForm(forms.Form):
-    qty = forms.IntegerField(min_value=1)
 
 
 class OrderForm(forms.ModelForm):

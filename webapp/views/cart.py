@@ -5,8 +5,8 @@ from django.urls import reverse, reverse_lazy
 from django.views import View
 from django.views.generic import CreateView, ListView, DeleteView, TemplateView
 
-from webapp.forms import CartForm, OrderForm, ProductForm
-from webapp.models import Cart, Product, Order, OrderProduct
+from webapp.forms import OrderForm, ProductForm
+from webapp.models import Product, Order, OrderProduct
 
 
 class CartAddView(View):
@@ -98,13 +98,14 @@ class OrderCreate(CreateView):
 
         products = []
         order_products = []
-
-        for item in Cart.objects.all():
-            order_products.append(OrderProduct(product=item.product, qty=item.qty, order=order))
-            item.product.amount -= item.qty
-            products.append(item.product)
-
-        OrderProduct.objects.bulk_create(order_products)
-        Product.objects.bulk_update(products, ("amount",))
-        Cart.objects.all().delete()
+        cart = self.request.session.get('cart', {})
+        if cart:
+            for pk, qty in cart.items():
+                product = Product.objects.get(pk=pk)
+                order_products.append(OrderProduct(product=product, qty=qty, order=order))
+                product.amount -= qty
+                products.append(product)
+            OrderProduct.objects.bulk_create(order_products)
+            Product.objects.bulk_update(products, ("amount",))
+            self.request.session.pop('cart')
         return HttpResponseRedirect(self.success_url)

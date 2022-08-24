@@ -94,8 +94,10 @@ class OrderCreate(CreateView):
     #     return HttpResponseRedirect(self.success_url)
 
     def form_valid(self, form):
-        order = form.save()
-
+        order = form.save(commit=False)
+        if self.request.user.is_authenticated:
+            order.user = self.request.user
+        order.save()
         products = []
         order_products = []
         cart = self.request.session.get('cart', {})

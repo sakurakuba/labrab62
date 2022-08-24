@@ -1,3 +1,4 @@
+from django.contrib.auth import get_user_model
 from django.db import models
 from django.core.validators import MinValueValidator
 
@@ -29,6 +30,7 @@ class Product(models.Model):
 
 
 class Order(models.Model):
+    user = models.ForeignKey(get_user_model(), on_delete=models.CASCADE, related_name='orders', verbose_name='Human', null=True, blank=True)
     name = models.CharField(max_length=50, verbose_name='Имя')
     phone = models.CharField(max_length=30, verbose_name='Телефон')
     address = models.CharField(max_length=100, verbose_name='Адрес')

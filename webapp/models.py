@@ -1,6 +1,7 @@
 from django.contrib.auth import get_user_model
 from django.db import models
 from django.core.validators import MinValueValidator
+from django.db.models import Sum, F
 
 DEFAULT_CATEGORY = 'other'
 CATEGORY_CHOICES = (
@@ -40,6 +41,10 @@ class Order(models.Model):
 
     def __str__(self):
         return f'{self.name} - {self.phone}'
+
+    def get_total(self):
+        total = self.order_products.aggregate(total=Sum(F("qty") * F("product__price")))
+        return total["total"]
 
     class Meta:
         verbose_name = 'Заказ'

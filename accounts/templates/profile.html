@@ -8,9 +8,12 @@
         ===========================================
         {% for order_product in order.order_products.all %}
             <h5 class="card-title">Product: {{ order_product.product.name }}</h5>
+            <h6 class="card-subtitle mb-2 text-muted">Price: {{ order_product.product.price }}</h6>
             <h6 class="card-subtitle mb-2 text-muted">Qty: {{ order_product.qty }}</h6>
             <h6 class="card-subtitle mb-2 text-muted">Sum: {{ order_product.get_sum }}</h6>
         {% endfor %}
+        $$$$$$$$$$$
+            <h6 class="card-subtitle mb-2 text-muted">Total: {{ order.get_total }}</h6>
     {% endfor %}
         </div>
     </div>

@@ -1,0 +1,17 @@
+{% extends "base.html" %}
+
+{% block title %}Profile{% endblock %}
+{% block content %}
+    <div class="card flex-row mt-3">
+        <div class="card-body ms-5">
+    {% for order in user_obj.orders.all %}
+        ===========================================
+        {% for order_product in order.order_products.all %}
+            <h5 class="card-title">Product: {{ order_product.product.name }}</h5>
+            <h6 class="card-subtitle mb-2 text-muted">Qty: {{ order_product.qty }}</h6>
+            <h6 class="card-subtitle mb-2 text-muted">Sum: {{ order_product.get_sum }}</h6>
+        {% endfor %}
+    {% endfor %}
+        </div>
+    </div>
+{% endblock %}

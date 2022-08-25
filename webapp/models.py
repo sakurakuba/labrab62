@@ -56,6 +56,9 @@ class OrderProduct(models.Model):
     def __str__(self):
         return f'{self.product.name} - {self.order.name}'
 
+    def get_sum(self):
+        return self.qty * self.product.price
+
     class Meta:
         verbose_name = 'Товар в заказе'
         verbose_name_plural = 'Товары в заказе'

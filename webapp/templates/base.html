@@ -25,6 +25,10 @@
                     <li class="nav-item">
                         <a class="nav-link" href="{% url "accounts:logout" %}">Logout</a>
                     </li>
+                    <li class="nav-item">
+                        <p class="nav-link">Здравствуйте <a
+                                href="{% url "accounts:profile" request.user.pk %}">{{ user.username }}</a></p>
+                    </li>
                 {% else %}
                     <li class="nav-item">
                         <a class="nav-link" href="{% url "accounts:login" %}?next={{ request.get_full_path }}">Login</a>

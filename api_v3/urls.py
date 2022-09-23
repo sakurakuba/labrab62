@@ -13,5 +13,7 @@ router.register("products", ProductViewSet)
 urlpatterns = [
     path('', include(router.urls)),
     path('orders/', OrderView.as_view()),
-    path('orders/<int:pk>/', OrderView.as_view())
+    path('orders/<int:pk>/', OrderView.as_view()),
+    path('login/', obtain_auth_token, name='api_token_auth'),
+
 ]
